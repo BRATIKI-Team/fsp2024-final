@@ -9,6 +9,7 @@ from passlib.context import CryptContext
 
 from app.api.dto.login_dto import LoginDto
 from app.api.dto.login_result_dto import LoginResultDto
+from app.api.dto.refresh_token_request_dto import RefreshTokenReq
 from app.api.dto.register_dto import RegisterDto
 from app.core.config import JWT_SECRET_KEY, JWT_ALGORITHM, ACCESS_TOKEN_EXPIRE_MINUTES
 from app.data.domains.user import User
@@ -41,26 +42,58 @@ class AuthService:
                 detail="Incorrect email or password",
                 headers={"WWW-Authenticate": "Bearer"},
             )
+
+        return self.complete_user_login(user)
+
+    async def refresh_token(self, refresh_token_req: Annotated[RefreshTokenReq, Depends(RefreshTokenReq)]):
+        payload = jwt.decode(refresh_token_req.refresh_token, JWT_SECRET_KEY, algorithms=JWT_ALGORITHM)
+        user_email = payload.get("sub")
+        if not user_email:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Could not validate credentials",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+
+        user = await self.user_service.get_user_by_email(user_email)
+        if not User:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="User not found",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+
+        return self.complete_user_login(user)
+
+    def complete_user_login(self, user: User) -> LoginResultDto:
         access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+        refresh_token_expires = timedelta(days=7)
+
         creds = {"id": user.id, "sub": user.email}
         access_token = self.create_access_token(creds, access_token_expires)
-        return LoginResultDto(id=user.id, email=user.email, token=access_token)
+        refresh_token = self.create_access_token(creds, refresh_token_expires)
+        return LoginResultDto(
+            id=user.id,
+            email=user.email,
+            token=access_token,
+            refresh_token=refresh_token
+        )
 
     @classmethod
-    def create_access_token(cls, data: dict, expires_delta: timedelta) -> str:
+    def create_access_token(cls, data: dict, expire_date: timedelta) -> str:
         to_encode = data.copy()
-        expire = datetime.now(timezone.utc) + expires_delta
+        expire = datetime.now(timezone.utc) + expire_date
         to_encode.update({"exp": expire})
         encoded_jwt = jwt.encode(
             to_encode, key=JWT_SECRET_KEY, algorithm=JWT_ALGORITHM)
         return encoded_jwt
 
     @classmethod
-    def get_current_user_id(
+    def require_user_id(
             cls,
-            token: Annotated[str, Depends(
-                OAuth2PasswordBearer(tokenUrl="token"))]
-    ) -> User:
+            token: Annotated[str, Depends(OAuth2PasswordBearer(tokenUrl="token"))]
+    ) -> str:
+        print("require_user", token)
         payload = jwt.decode(token, JWT_SECRET_KEY, algorithms=JWT_ALGORITHM)
         user_id = payload.get("id")
         if user_id is None:
