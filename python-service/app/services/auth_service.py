@@ -55,10 +55,11 @@ class AuthService:
         return encoded_jwt
 
     @classmethod
-    def get_current_user_id(
+    def require_user_id(
             cls,
             token: Annotated[str, Depends(OAuth2PasswordBearer(tokenUrl="token"))]
-    ) -> User:
+    ) -> str:
+        print("require_user", token)
         payload = jwt.decode(token, JWT_SECRET_KEY, algorithms=JWT_ALGORITHM)
         user_id = payload.get("id")
         if user_id is None:

@@ -25,8 +25,10 @@ async def login(
 ) -> LoginResultDto:
     return await auth_service.login(login_dto)
 
+# to require jwt inject require_user method from AuthService
 @router.get("/get-all", name="users:get-all")
 async def get_all(
+        user_id: Annotated[str, Depends(AuthService.require_user_id)],
         user_service: Annotated[UserService, Depends(UserService)]
 ) -> List[User]:
     return await user_service.get_all()

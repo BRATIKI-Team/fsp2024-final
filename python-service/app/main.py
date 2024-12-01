@@ -7,6 +7,7 @@ from app.api.routes import user_router
 def get_application() -> FastAPI:
     application = FastAPI(title="test_app")
 
+    #middlewares
     application.add_middleware(
         CORSMiddleware,
         allow_origins=["*"],
@@ -15,6 +16,7 @@ def get_application() -> FastAPI:
         allow_headers=["*"],
     )
 
+    #routes
     application.include_router(user_router.router, tags=["users"], prefix="/user")
     return application
 
