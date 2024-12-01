@@ -1,11 +1,11 @@
-from typing import List, Type, TypeVar, Optional
+from typing import List, Type, TypeVar, Optional, Generic
 from pydantic import BaseModel
 
 from app.data.repositories.base_repository import BaseRepository
 
 T = TypeVar("T", bound=BaseModel)
 
-class BaseService:
+class BaseService(Generic[T]):
     def __init__(self, repository: BaseRepository):
         self.repository = repository
 
@@ -27,7 +27,6 @@ class BaseService:
 
     async def get_all(self) -> List[T]:
         """All items in collection"""
-        print("get-alllllllllllllllllll")
         return await self.repository.get_all()
 
     async def filter(self, filters: dict) -> List[T]:

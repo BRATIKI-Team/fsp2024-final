@@ -1,7 +1,4 @@
-from typing import Annotated
-
 from motor.motor_asyncio import AsyncIOMotorDatabase
-
 
 def get_db() -> AsyncIOMotorDatabase:
     from motor.motor_asyncio import AsyncIOMotorClient
