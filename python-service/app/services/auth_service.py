@@ -51,13 +51,15 @@ class AuthService:
         to_encode = data.copy()
         expire = datetime.now(timezone.utc) + expires_delta
         to_encode.update({"exp": expire})
-        encoded_jwt = jwt.encode(to_encode, key=JWT_SECRET_KEY, algorithm=JWT_ALGORITHM)
+        encoded_jwt = jwt.encode(
+            to_encode, key=JWT_SECRET_KEY, algorithm=JWT_ALGORITHM)
         return encoded_jwt
 
     @classmethod
     def get_current_user_id(
             cls,
-            token: Annotated[str, Depends(OAuth2PasswordBearer(tokenUrl="token"))]
+            token: Annotated[str, Depends(
+                OAuth2PasswordBearer(tokenUrl="token"))]
     ) -> User:
         payload = jwt.decode(token, JWT_SECRET_KEY, algorithms=JWT_ALGORITHM)
         user_id = payload.get("id")
@@ -69,13 +71,3 @@ class AuthService:
             )
 
         return user_id
-
-
-
-
-
-
-
-
-
-
