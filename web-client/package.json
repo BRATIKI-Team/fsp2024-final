@@ -11,8 +11,16 @@
   },
   "dependencies": {
     "@nuxtjs/tailwindcss": "^6.12.2",
+    "@sidebase/nuxt-auth": "^0.9.4",
+    "next-auth": "~4.21.1",
     "nuxt": "^3.14.1592",
     "vue": "latest",
     "vue-router": "latest"
+  },
+  "devDependencies": {
+    "prettier": "^3.4.1",
+    "prettier-plugin-organize-attributes": "^1.0.0",
+    "prettier-plugin-organize-imports": "^4.1.0",
+    "prettier-plugin-tailwindcss": "^0.6.9"
   }
 }

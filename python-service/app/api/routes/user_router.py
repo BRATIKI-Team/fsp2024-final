@@ -12,12 +12,14 @@ from app.services.user_service import UserService
 
 router = APIRouter()
 
+
 @router.post("/register", name="users:register")
 async def register(
         register_dto: Annotated[RegisterDto, Body(...)],
         auth_service: Annotated[AuthService, Depends(AuthService)]
 ) -> bool:
     return await auth_service.register(register_dto)
+
 
 @router.post("/login", name="users:login")
 async def login(
@@ -26,12 +28,14 @@ async def login(
 ) -> LoginResultDto:
     return await auth_service.login(login_dto)
 
+
 @router.post("/refresh-token", name="users:refresh-token")
 async def refresh_token(
         refresh_token_req: Annotated[RefreshTokenReq, Body(...)],
         auth_service: Annotated[AuthService, Depends(AuthService)]
 ) -> LoginResultDto:
     return await auth_service.refresh_token(refresh_token_req)
+
 
 # to require jwt inject require_user method from AuthService
 @router.get("/get-all", name="users:get-all")
@@ -41,12 +45,14 @@ async def get_all(
 ) -> List[User]:
     return await user_service.get_all()
 
+
 @router.get("/{user_id}", name="users:get-by-id")
 async def get_by_id(
         user_id: str,
         user_service: Annotated[UserService, Depends(UserService)]
 ) -> Optional[User]:
     return await user_service.get(user_id)
+
 
 @router.delete("/{user_id}", name="users:delete-by-id")
 async def delete_by_id(
